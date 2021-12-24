@@ -98,5 +98,7 @@ void up(int sem)
 //------------------------------------------------------------------------------------------------//
 typedef struct Item
 {
-    int data1,data2;
+    //any dummy data
+    //I added a serial for debugging
+    int data1,serial;
 }item;

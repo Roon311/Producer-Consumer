@@ -59,7 +59,7 @@ void Produce()
     int new_index =*index+1;
     //
     items[new_index].data1 =1;
-    items[new_index].data2 =2;
+    items[new_index].serial =total_produced;
     //
     (*index) ++;
     up(items_sem);

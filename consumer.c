@@ -32,7 +32,7 @@ void Consume()
     item* items = (item*) buffaddr;
     int new_index =*index-1;
     //
-    
+    printf("Recieved item with serial %d\n",items[(*index)].serial);
     //delete the item ... idk how !!!
     //
     (*index)--;
