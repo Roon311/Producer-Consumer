@@ -72,7 +72,8 @@ void main(int argc, char *argv[])
     signal(SIGINT,cleanup);
     if (argc ==1)
     {
-        printf("provide the rate retard\n");
+        printf("provide the rate in the arguments \n");
+        exit(-1); 
     }
     int cons_time;
     cons_time = atoi(argv[1]);
@@ -90,8 +91,9 @@ void main(int argc, char *argv[])
     while (true)
     {
         sleep(cons_time);
-        if(!is_empty())
-            Consume();
+        while(is_empty())
+            sleep(1);
+        Consume();
     }
     
 

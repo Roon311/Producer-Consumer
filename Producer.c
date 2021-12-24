@@ -97,7 +97,8 @@ void main(int argc, char *argv[])
     signal(SIGINT,cleanup);
     if (argc ==1)
     {
-        printf("provide the rate retard\n");
+        printf("provide the rate in the arguments \n");
+        exit(-1);
     }
     
     int prod_time = atoi(argv[1]);
@@ -120,10 +121,10 @@ void main(int argc, char *argv[])
     while (true)
     {
         sleep(prod_time);
-        if (!is_full())
-        {
-            Produce();
-        }
+        while(is_full())
+            sleep(1);
+        Produce();
+        
         
         
     }
