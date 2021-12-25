@@ -22,6 +22,7 @@ key_t buff_key = 12613;
 key_t index_key = 13164;
 //key_t sem_test = 13166;
 int items_max =10;  // the number of max items in the buffer
+short sleep_interval = 10000;  //10 ms
 //------------------------------------------Global Variables------------------------------------//
 //-------------------------------------- Semaphores ----------------------------------------------//
 /* arg for semctl system calls. */
@@ -101,5 +102,7 @@ typedef struct Item
     //any dummy data
     //I added a serial for debugging
     int data1,serial;
+    char x;
+    float u;
     
 }item;

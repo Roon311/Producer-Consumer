@@ -7,7 +7,7 @@ int index_id;     // ID of current items index in shm
 void *buffaddr;   // pointer to know the items location
 void *index_addr; // to divide the mem
 int items_sem;    // semaphore 1
-int sem2;
+
 int total_consumed = 0;
 
 //----------------------------------------------------------------------------------------------//
@@ -31,26 +31,38 @@ void Consume()
     int new_index = *index - 1;
     //
     printf("Recieved item with serial %d\n", items[(*index)].serial);
-    // delete the item ... idk how !!!
-    //
+    if (items[(*index)].serial<1)
+    {
+        printf("Error occured... Exiting\n");
+        exit(-1);
+    }
+    
+    // delete the item from the buffer... idk how !!!
+    // right now all i can do is set its data to zeros
+    items[(*index)].serial =0; 
+    items[(*index)].data1 =0; 
+
     (*index)--;
-    up(items_sem);
+    
     printf("consumed\n");
     printf("items are now %d\n", new_index + 1);
     printf("total consumed: %d\n", total_consumed);
+   
+    
     total_consumed++;
+    
 }
 
 bool is_empty()
 {
-    printf("checking if empty\n");
+    printf("checking if empty...\n");
     down(items_sem);
     int *index = (int *)index_addr;
     //up(items_sem);
     if (*index == -1)
     {
         printf("empty\n");
-        up(items_sem);
+        
 
     }
     else
@@ -72,8 +84,8 @@ void main(int argc, char *argv[])
         printf("provide the rate in the arguments \n");
         exit(-1);
     }
-    int cons_time;
-    cons_time = atoi(argv[1]);
+    int cons_rate;
+    cons_rate = atoi(argv[1]);           // rate per second
 
     items_sem = semget(items_sem_key, 1, 0666);
 
@@ -86,12 +98,13 @@ void main(int argc, char *argv[])
 
     while (true)
     {
-        usleep((1000000/cons_time));
-        while (is_empty())
+        usleep((1000000/cons_rate));
+        while (is_empty())     //is_empty starts with a down
         {
-            //  sleep(1);
+            up(items_sem);
+            usleep(sleep_interval);
         }
-
         Consume();
+        up(items_sem);
     }
 }
