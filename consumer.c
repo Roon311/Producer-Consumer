@@ -1,115 +1,65 @@
 //------------------------------------------Includes--------------------------------------------//
-#include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/msg.h>
-#include <unistd.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <ctype.h>
-#include <signal.h>
-#include <sys/stat.h>
-#include <sys/file.h>
-#include <sys/shm.h>
-#include <sys/sem.h>
+#include "header.h"
 //----------------------------------------------------------------------------------------------//
 
-
-//------------------------------------------Global Variables------------------------------------//
-
-int shmid;  // shared memory ID
-int sem1 ;  // semaphore 1
-int sem2 ;  // semaphore 2
+int buffid; // shared memory ID of the buffer
+int index_id ;  //ID of current items index in shm
+void* buffaddr; // pointer to know the items location
+void *index_addr;//to divide the mem
+int items_sem;  // semaphore 1
+int sem2;
+int total_consumed = 0;
 
 //----------------------------------------------------------------------------------------------//
 
-
-//-------------------------------------- Semaphores ----------------------------------------------//
-/* arg for semctl system calls. */
-union Semun
-{
-    int val;               /* value for SETVAL */
-    struct semid_ds *buf;  /* buffer for IPC_STAT & IPC_SET */
-    ushort *array;         /* array for GETALL & SETALL */
-    struct seminfo *__buf; /* buffer for IPC_INFO */
-    void *__pad;
-};
-
-int create_sem(int key, int initial_value)
-{
-    union Semun semun;
-
-    int sem = semget(key, 1, 0666 | IPC_CREAT);
-
-    if (sem == -1)
-    {
-        perror("Error in create sem");
-        exit(-1);
-    }
-
-    semun.val = initial_value; /* initial value of the semaphore, Binary semaphore */
-    if (semctl(sem, 0, SETVAL, semun) == -1)
-    {
-        perror("Error in semctl");
-        exit(-1);
-    }
-
-    return sem;
-}
-
-void destroy_sem(int sem)
-{
-    if (semctl(sem, 0, IPC_RMID) == -1)
-    {
-        perror("Error in semctl");
-        exit(-1);
-    }
-}
-
-void down(int sem)
-{
-    struct sembuf p_op;
-
-    p_op.sem_num = 0;
-    p_op.sem_op = -1;
-    p_op.sem_flg = !IPC_NOWAIT;
-
-    if (semop(sem, &p_op, 1) == -1)
-    {
-        perror("Error in down()");
-        exit(-1);
-    }
-}
-
-void up(int sem)
-{
-    struct sembuf v_op;
-
-    v_op.sem_num = 0;
-    v_op.sem_op = 1;
-    v_op.sem_flg = !IPC_NOWAIT;
-
-    if (semop(sem, &v_op, 1) == -1)
-    {
-        perror("Error in up()");
-        exit(-1);
-    }
-}
-//------------------------------------------------------------------------------------------------//
-
-//------------------------------------------Clean Shared Memory-----------------------------------//
 
 void cleanup(int signum)
 {
-    shmctl(shmid, IPC_RMID, NULL);
+    printf("total consumed: %d\n",total_consumed);
+    shmdt(buffaddr);
+    shmdt(index_addr);
+    exit(1);
 }
 //------------------------------------------------------------------------------------------------//
 
 
 //------------------------------------------Consuming Function------------------------------------//
-void Consume(int shmid)
+void Consume()
 {
+    printf("trying to consume\n");
+    down(items_sem);
+    int* index = (int*)index_addr;
+    item* items = (item*) buffaddr;
+    int new_index =*index-1;
+    //
+    printf("Recieved item with serial %d\n",items[(*index)].serial);
+    //delete the item ... idk how !!!
+    //
+    (*index)--;
+    up(items_sem);
+    printf("consumed\n");
+    printf("items are now %d\n",new_index+1);
+    printf("total consumed: %d\n",total_consumed);
+    total_consumed ++;
+
+}
+
+bool is_empty() {
+    printf("checking if empty\n");
+    down(items_sem);
+    int* index = (int*)index_addr;
+    up(items_sem);
+    if (*index == -1)
+    {
+        printf("empty\n");
+    }
+    else
+    {
+        printf("not empty\n");
+    }
     
+    
+    return (*index == -1);
 }
 
 
@@ -117,9 +67,34 @@ void Consume(int shmid)
 
 
 //------------------------------------------Main------------------------------------------------//
-void main()
+void main(int argc, char *argv[])
 {
-    sem1 = create_sem(12614, 0);
-    sem2 = create_sem(12615, 0);
-    shmid = shmget(12613, 256, IPC_CREAT|0644);//creating the shared memory    return 0;
+    signal(SIGINT,cleanup);
+    if (argc ==1)
+    {
+        printf("provide the rate in the arguments \n");
+        exit(-1); 
+    }
+    int cons_time;
+    cons_time = atoi(argv[1]);
+    
+    items_sem = semget(items_sem_key,1,0666);
+    
+
+    //sem2 = semget(sem_test,1,0666);
+    buffid = shmget(buff_key,  items_max *sizeof(item),0666);
+    index_id = shmget(index_key,sizeof(int),0666);
+    buffaddr = shmat(buffid,(void *)0, 0);
+    index_addr = shmat(index_id,(void *)0, 0);
+    printf("consumer started successfully\n");
+    
+    while (true)
+    {
+        sleep(cons_time);
+        while(is_empty())
+            sleep(1);
+        Consume();
+    }
+    
+
 }
