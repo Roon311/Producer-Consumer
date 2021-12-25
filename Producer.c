@@ -100,15 +100,11 @@ void main(int argc, char *argv[])
     up(items_sem);
     while (true)
     {
-        sleep(prod_time);
+        usleep((1000000/prod_time));
         while(is_full())
-            sleep(1);
+        {
+            //sleep(1);
+        }
         Produce();
-        
-        
-        
     }
-    
-
-    
 }

@@ -86,7 +86,7 @@ void main(int argc, char *argv[])
 
     while (true)
     {
-        sleep(cons_time);
+        usleep((1000000/cons_time));
         while (is_empty())
         {
             //  sleep(1);
