@@ -9,3 +9,6 @@ clean:
 
 all: clean build
 
+run:
+	./producer.out
+
