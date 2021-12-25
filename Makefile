@@ -7,8 +7,8 @@ clean:
 
 
 
-all: clean build
+all: clean build run
 
 run:
-	./producer.out
+	./producer.out	2
 

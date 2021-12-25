@@ -1,21 +1,16 @@
 //------------------------------------------Includes--------------------------------------------//
 #include "header.h"
+//------------------------------------------------------------------------------------------------//
 
+
+//------------------------------------------Variables--------------------------------------------//
 int buffid; // shared memory ID of the buffer
 int index_id ;  //ID of current items index in shm
 void* buffaddr; // pointer to know the items location
 void *index_addr;//to divide the mem
 int items_sem;  // semaphore 1
 int sem2;  // semaphore 2
-int total_produced = 0;
-
-//
-
-//
-//const int shm_size = 1024;
-//const int buffer_size=10;
-//----------------------------------------------------------------------------------------------//
-
+int total_produced = 0; //counts the totl number of items produced
 
 //------------------------------------------------------------------------------------------------//
 
@@ -27,7 +22,7 @@ void cleanup(int signum)
     shmdt(buffaddr);
     shmdt(index_addr);
     shmctl(buffid, IPC_RMID, NULL);
-    shmctl(index_id, IPC_RMID, NULL);
+    shmctl(index_id, IPC_RMID, NULL); //could be removed???
     semctl(items_sem, 1, IPC_RMID); 
     exit(1);
 }
@@ -36,22 +31,7 @@ void cleanup(int signum)
 //------------------------------------------Producing Function------------------------------------//
 void Produce()
 {
-    /* //int next[buffer_size];
-    //buffaddr = (char*) shmat (shmid, 0, 0); 
-    if(atoi(buffaddr) == -1)
-    {
-        perror("Error in attach in writer");
-        exit(-1);
-    }
-    else
-    {
-        printf("\nShared memory attached at address %x\n", buffaddr);
-        //strcpy((char*) shmaddr, "Initial string!");
-    }
-    while(true)
-    {
-        printf("\nProducing...\n\n");
-    } */
+
     printf("trying to produce\n");
     down(items_sem);
     int* index = (int*)index_addr;
