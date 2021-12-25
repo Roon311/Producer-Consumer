@@ -116,6 +116,7 @@ void main(int argc, char *argv[])
 
     buffaddr = shmat(buffid,(void *)0, 0);
     index_addr = shmat(index_id,(void *)0, 0);
+    
     *(int*)index_addr=-1;
     up(items_sem);
     while (true)

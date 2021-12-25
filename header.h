@@ -12,7 +12,7 @@
 #include <sys/file.h>
 #include <sys/shm.h>
 #include <sys/sem.h>
-#include<stdbool.h>
+#include <stdbool.h>
 //----------------------------------------------------------------------------------------------//
 
 
