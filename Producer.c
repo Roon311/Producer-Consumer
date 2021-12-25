@@ -86,9 +86,9 @@ void main(int argc, char *argv[])
      
     int prod_rate = atoi(argv[1]);     // rate per second
     
-    if ( prod_rate <1)
+    if ( prod_rate <1  || prod_rate > 100)
     {
-        printf("srsly?\n");
+        printf("Rate error..Range from 1 to 100 per second\n");
         exit(-1);
     }
     printf("Producer started successfully\n");

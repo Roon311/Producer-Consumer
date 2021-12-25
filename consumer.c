@@ -86,7 +86,11 @@ void main(int argc, char *argv[])
     }
     int cons_rate;
     cons_rate = atoi(argv[1]);           // rate per second
-
+    if ( cons_rate <1  || cons_rate > 100)
+    {
+        printf("Rate error..Range from 1 to 100 per second\n");
+        exit(-1);
+    }
     items_sem = semget(items_sem_key, 1, 0666);
 
     // sem2 = semget(sem_test,1,0666);
